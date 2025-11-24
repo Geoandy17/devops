@@ -133,9 +133,12 @@ const initDatabase = async () => {
 };
 
 // Démarrage du serveur
-app.listen(PORT, async () => {
-  console.log(`🚀 Serveur backend démarré sur le port ${PORT}`);
-  await initDatabase();
-});
+// Démarrage du serveur
+if (require.main === module) {
+  app.listen(PORT, async () => {
+    console.log(`🚀 Serveur backend démarré sur le port ${PORT}`);
+    await initDatabase();
+  });
+}
 
-module.exports = app;
+module.exports = { app, pool };
