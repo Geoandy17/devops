@@ -102,11 +102,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🔡 Lowercase Repository Name
+        id: lowercase_repo
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: 🏷️ Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}/backend
+          images: ghcr.io/${{ env.REPO_LOWER }}/backend
           tags: |
             type=ref,event=branch
             type=sha,prefix={{branch}}-
@@ -120,8 +125,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/backend:buildcache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/backend:buildcache,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ env.REPO_LOWER }}/backend:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ env.REPO_LOWER }}/backend:buildcache,mode=max
 
       - name: 📝 Image info
         run: |
@@ -152,10 +157,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🔡 Lowercase Repository Name
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: 🔍 Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository }}/backend:latest
+          image-ref: ghcr.io/${{ env.REPO_LOWER }}/backend:latest
           format: "sarif"
           output: "trivy-results.sarif"
 
@@ -195,6 +204,10 @@ jobs:
           echo "  - helm upgrade myapp ./charts"
           echo "  - ssh serveur 'docker-compose pull && docker-compose up -d'"
 
+      - name: 🔡 Lowercase Repository Name
+        run: |
+          echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: 📝 Deployment summary
         run: |
           echo "### 🎉 Déploiement réussi !" >> $GITHUB_STEP_SUMMARY
@@ -204,7 +217,7 @@ jobs:
           echo "**Auteur:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Image:**" >> $GITHUB_STEP_SUMMARY
-          echo "\`ghcr.io/${{ github.repository }}/backend:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "\`ghcr.io/${{ env.REPO_LOWER }}/backend:latest\`" >> $GITHUB_STEP_SUMMARY
 
   # ================================
   # JOB 6 : NOTIFICATION
